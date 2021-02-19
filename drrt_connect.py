@@ -411,8 +411,9 @@ def drrt_connect(start_node, goal_node, ax, obstacle, animate, xbound, ybound, z
         print("No path found: max iteration reached.")
         print("Planning Failed!!!")
         isSuccessful = 0
+        no_of_nodes = 0
         Ptime = time.time() - st_time
-        return None, Ptime, None, isSuccessful
+        return None, Ptime, no_of_nodes, isSuccessful
     
     T.optimal_path()
 
