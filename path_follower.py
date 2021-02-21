@@ -22,9 +22,16 @@ class follower:
         if animate:
             ax.scatter3D(point[0], point[1], point[2], color='green', s=150, zorder=20)
     
-    def closestObstacleDist(self, Obstacles, currentPose):
-    	distances = []
-    	for obstacle  in Obstacles:
-    		dist = norm(obstacle.pose - currentPose)
-    		distances.append(dist)
-    	return min(distances)
+    def closestObstacleDistNvel(self, Obstacles, currentPose):
+        distances = []
+        velocities =[]
+        for obstacle  in Obstacles:
+            dist = norm(obstacle.pose - currentPose)
+            velocity = obstacle.velocity
+            distances.append(dist)
+            velocities.append(velocity)
+            
+        minDist = min(distances) #taking closest obstacle
+        argmin = distances.index(minDist) #getting the index
+        colsestObstacle_velociity = velocities[argmin]
+        return minDist, colsestObstacle_velociity

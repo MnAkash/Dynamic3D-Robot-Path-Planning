@@ -43,7 +43,7 @@ def RRT(start,goal, ax, obstacles, animate, xbound, ybound, zbound):
     maxiters  = 750
     nearGoal = False # This will be set to true if goal has been reached
     minDistGoal = 0.05 # Convergence criterion: success when the tree reaches within 0.25 in distance from the goal.
-    d = .3 # [m], Extension parameter: this controls how far the RRT extends in each step.
+    d = .5 # [m], Extension parameter: this controls how far the RRT extends in each step.
     # Initialize RRT. The RRT will be represented as a 2 x N list of points.
     # So each column represents a vertex of the tree.
     rrt = []

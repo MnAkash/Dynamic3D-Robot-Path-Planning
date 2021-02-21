@@ -23,6 +23,7 @@ class Parallelepiped:
         self.dimensions = [0,0,0]
         self.pose = [0,0,0]
         self.dir = [0,0,0]
+        self.velocity = 0
         self.verts = self.vertixes()
         
     def vertixes(self):
@@ -83,7 +84,7 @@ class Parallelepiped:
 
 
 class ObjecClass:
-    def __init__(self, start, goal, no_of_objects = 5, object_size = 5, safety_radius=2, xbound = (0,50), ybound= (0,50), zbound= (0,30)):
+    def __init__(self, start, goal, no_of_objects , object_size , safety_radius, xbound , ybound, zbound):
         self.safety_radius = safety_radius #invisible boundary outside the object
         self.obstacles_poses = [] #obstacles positions
         self.obstacles_dims = [] #obsatacles dimensions
@@ -117,7 +118,7 @@ class ObjecClass:
             self.obstacles_poses.append(object_position)
             #appending the cube dimensions of all objects
             self.obstacles_dims.append([size_with_safety, size_with_safety, size_with_safety] )
-            self.dir.append([rn.uniform(-1.5,1.5),rn.uniform(-1.5,1.5),rn.uniform(-1.5,1.5)])
+            self.dir.append([rn.uniform(-1,1),rn.uniform(-1,1),rn.uniform(-1,1)])
 
         #Zip positions and dimensions respectively and send to add_obstacle() to create 'obstacels' object
         for pose, dim, Dir in zip(self.obstacles_poses, self.obstacles_dims, self.dir):
@@ -136,6 +137,7 @@ class ObjecClass:
         obstacle.dimensions = dim
         obstacle.pose = pose
         obstacle.dir = Dir
+        obstacle.velocity = norm(Dir)
         obstacles.append(obstacle)
         return obstacles
 

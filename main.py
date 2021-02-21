@@ -23,28 +23,30 @@ object_size = 8
 safety_radius= 10 #assuming it will be within this region after 1 second
 xbound = (0,100)
 ybound= (0,100)
-zbound= (0,90)
+zbound= (0,85)
 stepSize = 2 #stepsize of subject moment that defines the speed of the robot(not rrt stepSize)
-consciousness_dist = range(20,81,5) #(i,j,k) >> i to j-1, stepsize=k
+consciousness_dist = range(13,22,2) #(i,j,k) >> i to j-1, stepsize=k
 min_safeApproach_dist = 10
+
+
 waitTime = 10 #object waiting moments if obstructed by a obstacle inside min_safeApproach_dist
 
-'''We can let Safe_waitTime be as a variable parameter using the speed of obstacle'''
-Safe_waitTime = 10 #object waiting moments while moving slow between consciousness_dist and min_safeApproach_dist
+#object waiting moments while moving slow between consciousness_dist and min_safeApproach_dist
+Safe_waitTime = 5 #just initializing
 
-experients = 15 #Number of experiments to conduct
+experients = 1 #Number of experiments to conduct
 
-RRTanimate = 0 #wiill node exploration animation be shown
-subjectAnimate = 0 #wiill subject path following animation be shown
+RRTanimate = 1 #wiill node exploration animation be shown
+subjectAnimate = 1 #wiill subject path following animation be shown
 
-algorithm = 'drrt' #define which path planning algorithm to use 'rrt' and 'drrt'
+algorithm = 'rrt' #define which path planning algorithm to use 'rrt' and 'drrt'
 #algorithm = 'drrt'
 
 
 
 # Start and goal positions
 start = np.array([20, 20, 0])
-goal =  np.array([80, 85, 68])
+goal =  np.array([85, 80, 75])
     
 
 
@@ -116,7 +118,7 @@ def plan(algorithm,ax,start, goal, obstacles,RRTanimate,subjectAnimate, xbound, 
 
 
 
-#This function will generate the values to calculate final result(in cDist fuction) after each experiment
+#This function will generate the values to calculate final result(in simulate_for_each_cDist fuction) after each experiment
 #For example if experients=50, it will be called 50 time for each conciousness distance.
 def main(RRTanimate, subjectAnimate, c_dist):
     no_of_collision = 0 #will be used to count nuber of collisions
@@ -165,9 +167,10 @@ def main(RRTanimate, subjectAnimate, c_dist):
     i =0
     wait = 0
     safe_wait = 0
+    global Safe_waitTime
     while not isReached(currentPose, interpolated_points[-1]):
-        #If stays slow(between i.e. 20-10cm)  and standstill(inside e.g 10cm) for waitTime
-        if wait < waitTime and safe_wait<Safe_waitTime :
+        #If stays  standstill(inside e.g 10cm) for waitTime and slow(between i.e. 20-10cm)
+        if wait < waitTime and safe_wait<Safe_waitTime:
             obstacles = obj.give_objects()#fetching latest obstacle positions
             
             if subjectAnimate:
@@ -181,7 +184,7 @@ def main(RRTanimate, subjectAnimate, c_dist):
             drawRRTSmoothpath(sP, ax,subjectAnimate)# drawing smoothed RRT generated path
             
             #change obstacle direction if it colides with subject
-            #obj.change_dir_if_Collide_subject(currentPose, goal)
+            obj.change_dir_if_Collide_subject(currentPose, goal)
             
             
             #move function updates the object according to direction vector
@@ -190,19 +193,20 @@ def main(RRTanimate, subjectAnimate, c_dist):
             
             
             #Setting speed configuration
-            closestObstacle_dist = subject.closestObstacleDist(obstacles, currentPose)
+            closestObstacle_dist, velocity = subject.closestObstacleDistNvel(obstacles, currentPose)
+            Safe_waitTime = 10/velocity
             if closestObstacle_dist> c_dist:
-                stepSize = 2
+                stepSize = 2 #fast
                 i = i+1
                 wait = 0
                 safe_wait =0
             elif min_safeApproach_dist < closestObstacle_dist < c_dist:
-                stepSize = 1
+                stepSize = 1 #slow
                 i = i+1
                 wait = 0
                 safe_wait +=1
             else:
-                stepSize = 0
+                stepSize = 0 #stop
                 if wait == 0:# to count collision one time 
                     no_of_collision += 1
                 wait += 1
@@ -231,6 +235,7 @@ def main(RRTanimate, subjectAnimate, c_dist):
                 plt.pause(0.01)
         else:
             print("=========Replanning=========")
+            obstacles = obj.give_objects()#fetching latest obstacle positions before replanning
             P ,sP ,interpolated_points,planning_time,no_of_nodes, isSuccessful = plan(algorithm,
                                                                                      ax,
                                                                                      currentPose, 
